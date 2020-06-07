@@ -1,3 +1,14 @@
-To run the application, you need to create a file with the extension .bat and write the following command there:
-start "" java -cp lib/* -jar CreateDbForApp.jar
-Еhen double click on the created file and enjoy
+The application to for quicly create a new database to use in your JavaEE Web projects.
+
+Edit the file 'database.propetries' In the folder 'createDb " and double click the file 'Start.bat'. Enjoy
+For Linux use follow command in a terminal: java -cp lib/* -jar
+
+Программа CreateDbForApp предназначена для быстрого создания базы данных используемой в веб приложениях с JavaEE .
+Как это работает.
+1. В файле database.properties запишите название (имя) вашей базы данных, имя пользователя базы данных и пароль доступа этого пользователя (обычно, все три параметра для учебной программы совпадают, для других случаев обязательно укжите индивидуальный сложный пароль).
+2. Запустите двойным кликом пакетный файл Start.bat (если не работает, то ищите решение запустить CreateDbForApp.jar с библиотекой lib для вашей системы. Обычно надо выполнить в cmd (PowerShell) следующую команду: 
+java -cp lib/* -jar CreateDbForApp.jar
+Укажите путь к исполняемому файлу java.exe на вашем компьютере, если он не определен в переменной окружения Path)
+База настраивается на использование utf8_general_ci, a указанному пользователю выдаются на неё все привилегии.
+Примечание: У вас должен быть установлен XAMPP с базовыми настойками. В противном случае, слушайте подсказки программы и выполняйте ее просьбы.
+Если программа не выполняет свою работу, проверьте наличие такой базы данных или пользователя. Удалите существующую базу и пользователя. Запустите программу снова.

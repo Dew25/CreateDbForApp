@@ -33,47 +33,38 @@ public class CreateDbForApp {
          
         Scanner scanner = new Scanner(System.in);
         String quit = "";
+        Connection conn = null;
+        Properties props = new Properties();
+        String jdbcdrivername = null;
+        String dbname = null;
+        String username = null;
+        String password = null;
+        String root = null;
+        String rootpassword = null;
+        String url = null;
         try {
-            Class.forName("com.mysql.jdbc.Driver").getDeclaredConstructor().newInstance();
-            String url = "jdbc:mysql://localhost?serverTimezone=Europe/Tallinn&useSSL=false&useUnicode=true&characterEncoding=utf8";
-            String username = "root";
-            String password = "";
-            Connection conn = null;
-            try {
-               conn = DriverManager.getConnection(url, username, password);
-            } catch (SQLException ex) {
-                System.out.println("Error connection to database");
-               do{
-                   System.out.println("URL database(jdbc:mysql://localhost): ");
-                   url = scanner.nextLine();
-                   if(!url.contains("?"))
-                       url = url+"?serverTimezone=Europe/Tallinn&useSSL=false&useUnicode=true&characterEncoding=utf8";
-                   System.out.println("Login database admin (root): ");
-                   username = scanner.nextLine();
-                   System.out.println("Password for admin: ");
-                   password = scanner.nextLine();
-                   try {   
-                        conn = DriverManager.getConnection(url, username, password);
-                        quit = "q";
-                   } catch (SQLException ex1) {
-                       System.out.println("Connection faled. \n(For exit press 'q', to continue press any key)\n");
-                       quit = scanner.next();
-                   }
-               }while(!quit.equals("q"));
-               if (conn == null){
-                   System.out.println("Goodbye!");
-                   System.exit(0);
-               }
-            }
-            Properties props = new Properties();
-            String dbname=null;
             try(InputStream in = Files.newInputStream(Paths.get("database.properties"))){
                 props.load(in);
+                jdbcdrivername = props.getProperty("jdbcdrivername");
+                url = props.getProperty("url");
+                root = props.getProperty("root");
+                rootpassword = props.getProperty("rootpassword");
                 dbname = props.getProperty("dbname");
                 username = props.getProperty("username");
                 password = props.getProperty("password");
             } catch (IOException ex) {
-               Logger.getLogger(CreateDbForApp.class.getName()).log(Level.SEVERE, "Failed read properties.");
+               System.out.println("Failed read properties.");
+               System.out.println(ex);
+               System.out.println("jdbcdrivername: (com.mysql.jdbc.Driver) ");
+               jdbcdrivername = scanner.nextLine();
+               System.out.println("url");
+               url = scanner.nextLine();
+               System.out.println("root");
+               root = scanner.nextLine();
+               System.out.println("rootpassword: ");
+               rootpassword = scanner.nextLine();
+               System.out.println("Your database name: ");
+               dbname = scanner.nextLine();
                System.out.println("Your database name: ");
                dbname = scanner.nextLine();
                System.out.println("Username your database: ");
@@ -81,31 +72,45 @@ public class CreateDbForApp {
                System.out.println("Password your database: ");
                password = scanner.nextLine();
             }
-            
-            String query = "CREATE DATABASE "+dbname+" CHARACTER SET utf8 COLLATE utf8_general_ci";
-            PreparedStatement preparedStatement = conn.prepareStatement(query);
-            preparedStatement.execute();
-            System.out.println("Database \""+dbname+"\" created");
-            query = "CREATE USER '"+username+"'@'localhost' IDENTIFIED BY '"+password+"'";
-            preparedStatement = conn.prepareStatement(query);
-            preparedStatement.execute();
-            query = "GRANT ALL PRIVILEGES ON "+dbname+" . * TO '"+username+"'@'localhost'";
-            preparedStatement = conn.prepareStatement(query);
-            preparedStatement.execute();
-            query = "FLUSH PRIVILEGES";
-            preparedStatement = conn.prepareStatement(query);
-            preparedStatement.execute();
-            System.out.println("Username \""+username+"\" with ALL PRIVELEGES to database \""+dbname+"\" created.");
-            
-            
+            if(url != null && url.equals("jdbc:mysql://localhost")){ 
+                Class.forName(jdbcdrivername).getDeclaredConstructor().newInstance();
+                url = url+"?serverTimezone=Europe/Tallinn&useSSL=false&useUnicode=true&characterEncoding=utf8";
+                try {
+                    conn = DriverManager.getConnection(url, root, rootpassword);
+                } catch (SQLException ex) {
+                    System.out.println("Error connection to database");
+                    do{
+                       System.out.println("URL database (jdbc:mysql://localhost):");
+                       url = scanner.nextLine();
+                       if(!url.equals("jdbc:mysql://localhost"))
+                            url = url+"?serverTimezone=Europe/Tallinn&useSSL=false&useUnicode=true&characterEncoding=utf8";
+                       System.out.println("Login database admin (root): ");
+                       username = scanner.nextLine();
+                       System.out.println("Password for admin: ");
+                       password = scanner.nextLine();
+                       try {   
+                            conn = DriverManager.getConnection(url, username, password);
+                            quit = "q";
+                       } catch (SQLException ex1) {
+                            System.out.println("Connection faled. \n(For exit press 'q', to continue press any key)\n");
+                            quit = scanner.next();
+                       }
+                    }while(!quit.equals("q"));
+                    if (conn == null){
+                        System.out.println("Goodbye!");
+                        System.exit(0);
+                    }
+                }
+                Mariadb mariadb = new Mariadb();
+                mariadb.createDb(conn, jdbcdrivername,url,dbname,username,password);
+            }    
         } catch (ClassNotFoundException 
-               | NoSuchMethodException 
-               | SecurityException 
-               | InstantiationException 
-               | IllegalAccessException 
-               | IllegalArgumentException 
-               | InvocationTargetException 
-               | SQLException ex) {
+                | NoSuchMethodException 
+                | SecurityException 
+                | InstantiationException 
+                | IllegalAccessException 
+                | IllegalArgumentException 
+                | InvocationTargetException ex){ 
             System.out.println("Failed create database: ");
             System.out.println(ex);
         }
