@@ -2,7 +2,8 @@
 
 ##### How to use.
 
-Edit the file '**database.propetries**' In the folder '**createDb**' and double click the file '**Start.bat**'. Enjoy
+Edit the file '**database.propetries**' In the folder '**createDb**' and double click the file '**Start.bat**'. Enjoy.
+
 For Linux use follow command in a terminal: `**java -cp lib/* -jar**`
 
 ------
